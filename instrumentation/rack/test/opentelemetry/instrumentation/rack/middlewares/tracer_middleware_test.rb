@@ -72,6 +72,19 @@ describe OpenTelemetry::Instrumentation::Rack::Middlewares::TracerMiddleware do
       _(first_span.status.code).must_equal OpenTelemetry::Trace::Status::UNSET
     end
 
+    describe 'with an hijacked response' do
+      let(:app) do
+        lambda do |env|
+          env['rack.hijack?'] = true
+          [-1, {}, []]
+        end
+      end
+
+      it 'track a span without error' do
+        _(first_span.status.code).must_equal OpenTelemetry::Trace::Status::UNSET
+      end
+    end
+
     it 'has no parent' do
       _(first_span.parent_span_id).must_equal OpenTelemetry::Trace::INVALID_SPAN_ID
     end

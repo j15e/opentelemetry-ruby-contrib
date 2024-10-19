@@ -109,7 +109,7 @@ module OpenTelemetry
             span = OpenTelemetry::Instrumentation::Rack.current_span
             return unless span.recording?
 
-            add_response_attributes(span, response) if response
+            add_response_attributes(span, response) if response && !request.env.key?('rack.hijack?')
           rescue StandardError => e
             OpenTelemetry.handle_error(exception: e)
           ensure

@@ -105,6 +105,19 @@ describe 'OpenTelemetry::Instrumentation::Rack::Middlewares::EventHandler' do
       _(proxy_event).must_be_nil
     end
 
+    describe 'with an hijacked response' do
+      let(:service) do
+        lambda do |env|
+          env['rack.hijack?'] = true
+          [-1, {}, []]
+        end
+      end
+
+      it 'track a span without error' do
+        _(rack_span.status.code).must_equal OpenTelemetry::Trace::Status::UNSET
+      end
+    end
+
     describe 'when baggage is set' do
       let(:headers) do
         Hash(

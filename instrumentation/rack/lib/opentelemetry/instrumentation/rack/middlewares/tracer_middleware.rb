@@ -81,7 +81,7 @@ module OpenTelemetry
                 request_span.add_event('http.proxy.request.started', timestamp: request_start_time) unless request_start_time.nil?
                 OpenTelemetry::Instrumentation::Rack.with_span(request_span) do
                   @app.call(env).tap do |status, headers, response|
-                    set_attributes_after_request(request_span, status, headers, response)
+                    set_attributes_after_request(request_span, status, headers, response) unless env.key?('rack.hijack?')
                     config[:response_propagators].each { |propagator| propagator.inject(headers) }
                   end
                 end
